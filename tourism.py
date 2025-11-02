@@ -15,7 +15,7 @@ from streamlit_option_menu import option_menu
 st.set_page_config(layout="wide")
 
 
-mypath = ''
+mypath = '/Users/boredom/Downloads/Data_Science/DataSets/'
 
 tourism = pd.read_csv(mypath + 'tour_econ_df.csv')
 
@@ -402,6 +402,54 @@ if selected=="Exploratory Analysis":
             
     st.markdown('---')
     
+    st.markdown('### <div style="text-align: center"> Scatterplot </div>', unsafe_allow_html=True)
+    
+    st.markdown('*Hover to see country*')
+    
+    col17, col18 = st.columns([2, 5])
+    
+    with st.form('scatter_form'):
+        x_var = col17.selectbox('Select x-axis variable', num_dict.values(), key=38)
+        x_var_df = [k for k, v in num_dict.items() if v == x_var][0]
+        y_var = col17.selectbox('Select y-axis variable', np.setdiff1d(list(num_dict.values()), x_var), key=39)
+        y_var_df = [k for k, v in num_dict.items() if v == y_var][0]
+        
+        color_var = col17.selectbox('Select color variable', np.setdiff1d(list(cat_dict.values()), 'Country'), key=400)
+        color_var_df = [k for k, v in cat_dict.items() if v == color_var][0]
+        
+        scale_y_match = col17.checkbox('Check to allow different y-scale', key=141)
+        match_y = None if scale_y_match else "y"
+            
+        
+        scale_x_match = col17.checkbox('Check to allow different x-scale', key=142)
+        match_x = None if scale_x_match else "x"
+        
+        user_cols = [x_var_df, y_var_df, color_var_df, 'country']
+        
+        data = tourism[user_cols].dropna()
+        
+        submitted = st.form_submit_button("Generate Scatter Plot")
+    
+    if submitted:
+        fig9 = px.scatter(
+            data,
+            x=x_var_df,
+            y=y_var_df,
+            color=color_var_df,
+            hover_name='country',
+            title=f'{x_var} vs {y_var} by {color_var}',
+            log_x=False, 
+            facet_col = color_var_df, 
+            facet_col_spacing=0.1, 
+            log_y=False
+        )
+        fig9.update_yaxes(matches=match_y, showticklabels=True)
+        fig9.update_xaxes(matches=match_x, showticklabels=True)
+        fig9.update_layout(title_x=0.28)
+        col18.plotly_chart(fig9, use_container_width=True)
+        
+    st.markdown('---')
+    
     st.header('Exploring Immigration Factors by Time and Region')
     
     st.markdown('---')
@@ -551,52 +599,6 @@ if selected=="Exploratory Analysis":
     
         
     st.markdown('---')
-    
-    st.markdown('### <div style="text-align: center"> Scatterplot </div>', unsafe_allow_html=True)
-    
-    col17, col18 = st.columns([2, 5])
-    
-    with st.form('scatter_form'):
-        x_var = col17.selectbox('Select x-axis variable', num_dict.values(), key=38)
-        x_var_df = [k for k, v in num_dict.items() if v == x_var][0]
-        y_var = col17.selectbox('Select y-axis variable', np.setdiff1d(list(num_dict.values()), x_var), key=39)
-        y_var_df = [k for k, v in num_dict.items() if v == y_var][0]
-        
-        color_var = col17.selectbox('Select color variable', np.setdiff1d(list(cat_dict.values()), 'Country'), key=40)
-        color_var_df = [k for k, v in cat_dict.items() if v == color_var][0]
-        
-        scale_y_match = col17.checkbox('Check to allow different y-scale', key=141)
-        match_y = None if scale_y_match else "y"
-            
-        
-        scale_x_match = col17.checkbox('Check to allow different x-scale', key=142)
-        match_x = None if scale_x_match else "x"
-        
-        user_cols = [x_var_df, y_var_df, color_var_df, 'country']
-        
-        data = tourism[user_cols].dropna()
-        
-        submitted = st.form_submit_button("Generate Scatter Plot")
-    
-    if submitted:
-        fig9 = px.scatter(
-            data,
-            x=x_var_df,
-            y=y_var_df,
-            color=color_var_df,
-            hover_name='country',
-            title=f'{x_var} vs {y_var} by {color_var}',
-            log_x=False, 
-            facet_col = color_var_df, 
-            facet_col_spacing=0.1, 
-            log_y=False
-        )
-        fig9.update_yaxes(matches=match_y, showticklabels=True)
-        fig9.update_xaxes(matches=match_x, showticklabels=True)
-        fig9.update_layout(title_x=0.4)
-        col18.plotly_chart(fig9, use_container_width=True)
-        
-    st.markdown('---')
 
 
 
@@ -713,7 +715,7 @@ if selected == 'Regional Impact of Tourism':
     fig.update_xaxes(showticklabels=True)
     col2.plotly_chart(fig)
 
-    fig=px.histogram(tourism.loc[tourism["region"].isin(regions_list),["region", "gdp","tourists_per_1000", "country"]].groupby(["region", "country"]).mean(numeric_only=True).reset_index(), x="tourists_per_1000",y="gdp",color='region',labels=all_dict, title="", barmode='group', histfunc='avg', log_y=True, height=400, nbins=30)
+    fig=px.histogram(tourism.loc[tourism["region"].isin(regions_list),["region", "gdp","tourists_per_1000", "country"]].groupby(["region", "country"]).mean(numeric_only=True).reset_index(), x="tourists_per_1000",y="gdp",color='region',labels=all_dict, title="", barmode='group', histfunc='avg', log_y=True, height=400, nbins=5)
     fig.update_layout(showlegend=True,margin=dict(l=20,r=20,t=50,b=20),font=dict(size=12))
     fig.update_yaxes(matches=None, showticklabels=False)
     fig.update_xaxes(matches=None, showticklabels=True)
@@ -738,7 +740,7 @@ if selected == 'Regional Impact of Tourism':
     fig.update_xaxes(showticklabels=True)
     col2.plotly_chart(fig)
 
-    fig=px.histogram(tourism.loc[tourism["region"].isin(regions_list),["region", "gdp","arv_1000", "country"]].groupby(["region", "country"]).mean(numeric_only=True).reset_index(), x="arv_1000",y="gdp",color='region',labels=all_dict, title="", barmode='group', histfunc='avg', log_y=True, height=400, nbins=30)
+    fig=px.histogram(tourism.loc[tourism["region"].isin(regions_list),["region", "gdp","arv_1000", "country"]].groupby(["region", "country"]).mean(numeric_only=True).reset_index(), x="arv_1000",y="gdp",color='region',labels=all_dict, title="", barmode='group', histfunc='avg', log_y=True, height=400, nbins=5)
     fig.update_layout(showlegend=True,margin=dict(l=20,r=20,t=50,b=20),font=dict(size=12))
     fig.update_yaxes(matches=None, showticklabels=False)
     fig.update_xaxes(matches=None, showticklabels=True)
@@ -762,7 +764,7 @@ if selected == 'Regional Impact of Tourism':
     fig.update_xaxes(showticklabels=True)
     col2.plotly_chart(fig)
 
-    fig=px.histogram(tourism.loc[tourism["region"].isin(regions_list),["region", "gdp","length", "country"]].groupby(["region", "country"]).mean(numeric_only=True).reset_index(), x="length",y="gdp",color='region',labels=all_dict, title="", barmode='group', histfunc='avg', log_y=True, height=400, nbins=30)
+    fig=px.histogram(tourism.loc[tourism["region"].isin(regions_list),["region", "gdp","length", "country"]].groupby(["region", "country"]).mean(numeric_only=True).reset_index(), x="length",y="gdp",color='region',labels=all_dict, title="", barmode='group', histfunc='avg', log_y=True, height=400, nbins=5)
     fig.update_layout(showlegend=True,margin=dict(l=20,r=20,t=50,b=20),font=dict(size=12))
     fig.update_yaxes(matches=None, showticklabels=False)
     fig.update_xaxes(matches=None, showticklabels=True)
@@ -816,7 +818,7 @@ if selected == 'Progressive Impact of Tourism':
         hover_name='country',
         projection='robinson'
         )
-    fig.update_layout(showlegend=True, margin=dict(l=10,r=20,t=50,b=60), font=dict(size=12), title_x=0.38)
+    fig.update_layout(showlegend=True, margin=dict(l=10,r=20,t=50,b=60), font=dict(size=12), title_x=0.3)
     col22.plotly_chart(fig)
     
     col1, col2 = st.columns([1, 1])
@@ -827,10 +829,10 @@ if selected == 'Progressive Impact of Tourism':
                  'medium': ["CAN", "GBR", "NAM", "SVK", "MYS", "BRN"],
                  'low': ['TCD', 'BGD', 'COD', 'PAK', 'ETH', 'GIN']}
     
-    fig=px.line(tourism.loc[tourism['code'].isin(tour_dict['high']), ["decade","tourists_per_1000","code", 'year', 'country']].dropna().sort_values(by=['year', 'code']).reset_index(drop=True), x="year",y="tourists_per_1000",color="country",hover_name='country',labels=all_dict, height = 300, width=400,title="", log_x=True, log_y = True)
+    fig=px.line(tourism.loc[tourism['code'].isin(tour_dict['high']), ["decade","tourists_per_1000","code", 'year', 'country']].dropna().sort_values(by=['year', 'code']).reset_index(drop=True), x="year",y="tourists_per_1000",color="country",hover_name='country',labels=all_dict, height = 300, width=400,title="High Tourists Yearly", log_x=True, log_y = True)
     fig.add_vline(x=2000, line_width=3, line_dash="dash", line_color="green")
     fig.add_vline(x=2010, line_width=3, line_dash="dash", line_color="green")
-    fig.update_layout(showlegend=True,margin=dict(l=20,r=20,t=50,b=20),font=dict(size=12), title_x=0.3)
+    fig.update_layout(showlegend=True,margin=dict(l=20,r=20,t=50,b=20),font=dict(size=12), title_x=0.22)
     fig.update_yaxes(showticklabels=True)
     fig.update_xaxes(showticklabels=True)
     col1.plotly_chart(fig)
@@ -838,25 +840,25 @@ if selected == 'Progressive Impact of Tourism':
     col2.markdown('Low (e.g. Tajikistan and Bangladesh): The trend is positive but weak, with low GDP countries in South Asia and Sub-Saharan Africa showing modest tourism growth (e.g. Pakistan’s cultural travel). Lags in the 1990s and 2000s stem from infrastructure and stability issues, with slight gains in the 2010s from emerging tourism.')
 
     
-    fig=px.line(tourism.loc[tourism['code'].isin(tour_dict['low']), ["decade","tourists_per_1000","country", 'code', 'year']].dropna().sort_values(by=['year', 'code']).reset_index(drop=True), x="year",y="tourists_per_1000",color="country",hover_name='country',labels=all_dict, height = 300, width=400,title="", log_x=True, log_y = True)
+    fig=px.line(tourism.loc[tourism['code'].isin(tour_dict['low']), ["decade","tourists_per_1000","country", 'code', 'year']].dropna().sort_values(by=['year', 'code']).reset_index(drop=True), x="year",y="tourists_per_1000",color="country",hover_name='country',labels=all_dict, height = 300, width=400,title="Low Tourists Yearly", log_x=True, log_y = True)
     fig.add_vline(x=2000, line_width=3, line_dash="dash", line_color="green")
     fig.add_vline(x=2010, line_width=3, line_dash="dash", line_color="green")
-    fig.update_layout(showlegend=True,margin=dict(l=20,r=20,t=50,b=20),font=dict(size=12))
+    fig.update_layout(showlegend=True,margin=dict(l=20,r=20,t=50,b=20),font=dict(size=12), title_x=0.17)
     fig.update_yaxes(showticklabels=True)
     fig.update_xaxes(showticklabels=True)
     col2.plotly_chart(fig)
     
     st.markdown('Medium (e.g. Canada and United Kingdom): The trend is positive but less pronounced, with GDP gains moderated by diverse economies. In North America and Europe, economic diversification (e.g. Canada) tempers tourism’s impact, with steady growth from the 2000s onward due to global travel networks.')
     
-    fig=px.line(tourism.loc[tourism['code'].isin(tour_dict['medium']), ["decade","tourists_per_1000","code", 'year', 'country']].dropna().sort_values(by=['year', 'code']).reset_index(drop=True), x="year",y="tourists_per_1000",color="country",hover_name='country',labels=all_dict, height = 300, width=400,title="", log_x=True, log_y = True)
+    fig=px.line(tourism.loc[tourism['code'].isin(tour_dict['medium']), ["decade","tourists_per_1000","code", 'year', 'country']].dropna().sort_values(by=['year', 'code']).reset_index(drop=True), x="year",y="tourists_per_1000",color="country",hover_name='country',labels=all_dict, height = 300, width=400,title="Medium Tourists Yearly", log_x=True, log_y = True)
     fig.add_vline(x=2000, line_width=3, line_dash="dash", line_color="green")
     fig.add_vline(x=2010, line_width=3, line_dash="dash", line_color="green")
-    fig.update_layout(showlegend=True,margin=dict(l=20,r=20,t=50,b=20),font=dict(size=12))
+    fig.update_layout(showlegend=True,margin=dict(l=20,r=20,t=50,b=20),font=dict(size=12), title_x=0.3)
     fig.update_yaxes(showticklabels=True)
     fig.update_xaxes(showticklabels=True)
     st.plotly_chart(fig)
     
-    col5, col6 = st.columns([1, 1])
+    col5, col6 = st.columns([1, 2])
     
     col5.markdown('This choropleth illustrates international tourist arrivals per 1,000 population, emphasizing destinations with the heaviest relative inbound tourism. The darkest shades (>1,000 arrivals per 1,000 people) highlight extreme tourism hubs like Macao, Hong Kong, Singapore, and Malta — urban or compact destinations with massive visitor throughput. Europe dominates the high-to-moderate range (500–1,000), particularly Scandinavia, the Mediterranean, and the Alps. North America and Oceania show moderate intensity, while Africa, South Asia, and interior South America remain in the lowest tiers, underscoring geographic and economic barriers to mass tourism access.')
     
@@ -872,7 +874,7 @@ if selected == 'Progressive Impact of Tourism':
         hover_name='country',
         projection='robinson'
         )
-    fig8.update_layout(showlegend=True, margin=dict(l=10,r=20,t=50,b=60), font=dict(size=12), title_x=0.38)
+    fig8.update_layout(showlegend=True, margin=dict(l=10,r=20,t=10,b=60), font=dict(size=12), title_x=0.24, title_y=0.96)
     col6.plotly_chart(fig8)
 
     col7, col8 = st.columns([1, 1])
@@ -913,7 +915,7 @@ if selected == 'Progressive Impact of Tourism':
     
     col9, col10 = st.columns([1, 1])
     
-    col10.markdown('This map shows average length of stay (in nights) for international tourists, with darker colors indicating longer durations. The longest stays (>100 nights) are rare but visible in select Middle Eastern (e.g., UAE, Qatar) and African nations, possibly reflecting expatriate workers or long-term visitors rather than typical tourists. Europe and Russia dominate mid-to-high ranges (50–100 nights), potentially driven by extended vacation cultures, retirement travel, or intra-regional mobility. North America, East Asia, and Oceania cluster in the moderate range (30–50 nights), while much of Sub-Saharan Africa, South Asia, and Southeast Asia show the shortest stays (<30 nights), likely due to shorter regional trips, business travel, or transit tourism.')
+    col9.markdown('This map shows average length of stay (in nights) for international tourists, with darker colors indicating longer durations. The longest stays (>100 nights) are rare but visible in select Middle Eastern (e.g., UAE, Qatar) and African nations, possibly reflecting expatriate workers or long-term visitors rather than typical tourists. Europe and Russia dominate mid-to-high ranges (50–100 nights), potentially driven by extended vacation cultures, retirement travel, or intra-regional mobility. North America, East Asia, and Oceania cluster in the moderate range (30–50 nights), while much of Sub-Saharan Africa, South Asia, and Southeast Asia show the shortest stays (<30 nights), likely due to shorter regional trips, business travel, or transit tourism.')
     
     fig7 = px.choropleth(
         tourism.groupby(['code', 'country']).sum(numeric_only=True).reset_index(),
